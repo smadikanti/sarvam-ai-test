@@ -80,6 +80,23 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .options {
+            margin-bottom: 20px;
+        }
+        .option-group {
+            margin-bottom: 10px;
+        }
+        .option-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -87,6 +104,29 @@
         <h1>Telugu Text-to-Speech</h1>
         
         <textarea id="textInput" placeholder="Type or paste your text here..."></textarea>
+        
+        <div class="options">
+            <div class="option-group">
+                <label for="voiceSelect">Select Voice:</label>
+                <select id="voiceSelect">
+                    <option value="anushka">Anushka (Female)</option>
+                    <option value="karun">Karun (Male)</option>
+                    <option value="meera">Meera (Female)</option>
+                    <option value="abhilash">Abhilash (Male)</option>
+                    <option value="manisha">Manisha (Female)</option>
+                </select>
+            </div>
+            <div class="option-group">
+                <label for="pitchSlider">Pitch (0 = Normal):</label>
+                <input type="range" id="pitchSlider" min="-1" max="1" step="0.1" value="0">
+                <span id="pitchValue">0</span>
+            </div>
+            <div class="option-group">
+                <label for="paceSlider">Pace (1 = Normal):</label>
+                <input type="range" id="paceSlider" min="0.3" max="3" step="0.1" value="1">
+                <span id="paceValue">1</span>
+            </div>
+        </div>
         
         <div class="controls">
             <div>
@@ -106,8 +146,20 @@
     </div>
 
     <script>
+        // Update slider values
+        document.getElementById('pitchSlider').addEventListener('input', function() {
+            document.getElementById('pitchValue').textContent = this.value;
+        });
+        
+        document.getElementById('paceSlider').addEventListener('input', function() {
+            document.getElementById('paceValue').textContent = this.value;
+        });
+        
         document.getElementById('speakButton').addEventListener('click', async () => {
             const text = document.getElementById('textInput').value.trim();
+            const voice = document.getElementById('voiceSelect').value;
+            const pitch = parseFloat(document.getElementById('pitchSlider').value);
+            const pace = parseFloat(document.getElementById('paceSlider').value);
             const statusElement = document.getElementById('status');
             const loadingElement = document.getElementById('loading');
             const audioContainer = document.getElementById('audioContainer');
@@ -130,7 +182,12 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ text }),
+                    body: JSON.stringify({ 
+                        text,
+                        voice,
+                        pitch,
+                        pace
+                    }),
                 });
                 
                 if (!response.ok) {
