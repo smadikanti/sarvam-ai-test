@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telugu Text-to-Speech</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            resize: vertical;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .audio-container {
+            margin-top: 20px;
+        }
+        #status {
+            color: #666;
+            font-style: italic;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #4CAF50;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Telugu Text-to-Speech</h1>
+        
+        <textarea id="textInput" placeholder="Type or paste your text here..."></textarea>
+        
+        <div class="controls">
+            <div>
+                <button id="speakButton">Convert to Speech</button>
+                <span id="status"></span>
+            </div>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Converting text to speech...</p>
+        </div>
+        
+        <div class="audio-container" id="audioContainer" style="display: none;">
+            <audio id="audioPlayer" controls style="width: 100%;"></audio>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('speakButton').addEventListener('click', async () => {
+            const text = document.getElementById('textInput').value.trim();
+            const statusElement = document.getElementById('status');
+            const loadingElement = document.getElementById('loading');
+            const audioContainer = document.getElementById('audioContainer');
+            const audioPlayer = document.getElementById('audioPlayer');
+            
+            if (!text) {
+                statusElement.textContent = 'Please enter some text';
+                return;
+            }
+            
+            try {
+                // Show loading indicator
+                statusElement.textContent = '';
+                loadingElement.style.display = 'block';
+                audioContainer.style.display = 'none';
+                
+                // Send the text to the server for synthesis
+                const response = await fetch('/synthesize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text }),
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to convert text to speech');
+                }
+                
+                const data = await response.json();
+                
+                // Hide loading indicator and show audio player
+                loadingElement.style.display = 'none';
+                audioContainer.style.display = 'block';
+                
+                // Set the audio source and play
+                audioPlayer.src = data.audio_url;
+                audioPlayer.load();
+                
+                // Enable auto-play if desired
+                // audioPlayer.play();
+                
+            } catch (error) {
+                loadingElement.style.display = 'none';
+                statusElement.textContent = `Error: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html> 
