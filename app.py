@@ -23,6 +23,9 @@ def index():
 def synthesize():
     data = request.json
     text = data.get('text', '')
+    voice = data.get('voice', 'anushka')
+    pitch = data.get('pitch', 0)
+    pace = data.get('pace', 1.0)
     
     if not text:
         return jsonify({"error": "No text provided"}), 400
@@ -38,9 +41,9 @@ def synthesize():
             inputs=[text],
             model="bulbul:v2",
             target_language_code="te-IN",  # Telugu language code
-            speaker="anushka",     # Using the anushka voice
-            pitch=0,
-            pace=1.0,
+            speaker=voice,                 # Using the selected voice
+            pitch=pitch,                   # Using the selected pitch
+            pace=pace,                     # Using the selected pace
             loudness=1.0,
             speech_sample_rate=16000,
             enable_preprocessing=True
